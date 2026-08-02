@@ -1,0 +1,6 @@
+{
+  "name": "مترجم و مبدل همه‌منظوره زیرنویس | Subtitle Translator & Converter",
+  "description": "سامانه هوشمند ترجمه، ویرایش و تبدیل فرمت زیرنویس با پشتیبانی از زبان فارسی (RTL)، مدل Gemini 3.6 Flash و ذخیره‌سازی محلی.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
