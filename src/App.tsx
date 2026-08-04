@@ -10,15 +10,19 @@ import {
   exportSubtitleFile, 
   detectEncodingAndDecode,
   fixRTLPunctuation,
+  timestampToSeconds,
   RTL_LANGUAGES
 } from './lib/subtitleParser';
+import { getApiKeyArrayForHeader } from './lib/apiKeyManager';
 import { UILanguage, TRANSLATIONS } from './lib/i18n';
 import { Header } from './components/Header';
 import { FileUpload } from './components/FileUpload';
 import { ConfigPanel } from './components/ConfigPanel';
 import { TranslationProgress } from './components/TranslationProgress';
 import { SubtitleEditor } from './components/SubtitleEditor';
+import { VideoSubtitlePreview } from './components/VideoSubtitlePreview';
 import { ApiKeyModal } from './components/ApiKeyModal';
+import { HelpModal } from './components/HelpModal';
 import { ToastContainer } from './components/Toast';
 
 export default function App() {
@@ -29,11 +33,24 @@ export default function App() {
     return (localStorage.getItem('gemini_ui_lang') as UILanguage) || 'fa';
   });
   const [userApiKey, setUserApiKey] = useState<string>(() => {
-    return localStorage.getItem('gemini_user_api_key') || '';
+    const keys = getApiKeyArrayForHeader();
+    return keys[0] || '';
   });
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   const t = TRANSLATIONS[uiLang];
+
+  // Helper to generate API headers with multi-key support
+  const getApiHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const keys = getApiKeyArrayForHeader();
+    if (keys.length > 0) {
+      headers['x-gemini-api-keys'] = JSON.stringify(keys);
+      headers['x-gemini-api-key'] = keys[0];
+    }
+    return headers;
+  };
 
   // Sync document direction and language code on uiLang change
   useEffect(() => {
@@ -117,13 +134,10 @@ export default function App() {
 
         showToast(`${t.newFileLoaded} (${parsed.items.length} ${t.linesCount})`, 'success');
 
-        // Trigger auto-language detection on server if first lines exist
-        if (parsed.items.length > 0) {
-          detectSourceLanguageOnServer(parsed.items.slice(0, 5).map((i) => i.originalText).join('\n'));
-        }
-      } catch (err) {
-        console.error('Subtitle parse error:', err);
-        showToast('Error parsing subtitle file.', 'error');
+        // Optional language detection on load
+        detectLanguageOnLoad(parsed.items);
+      } catch (err: unknown) {
+        showToast(err instanceof Error ? err.message : t.fileParseError, 'error');
       }
     };
 
@@ -131,40 +145,185 @@ export default function App() {
     return () => window.removeEventListener('processBuffer', handleProcessBuffer);
   }, [uiLang, t]);
 
-  // Save / Clear custom Gemini API key
+  const detectLanguageOnLoad = async (loadedItems: SubtitleItem[]) => {
+    if (loadedItems.length === 0) return;
+    const sampleText = loadedItems.slice(0, 5).map((i) => i.originalText).join(' ');
+
+    try {
+      const res = await fetch('/api/detect-language', {
+        method: 'POST',
+        headers: getApiHeaders(),
+        body: JSON.stringify({ text: sampleText }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.detectedLanguage) {
+          setDetectedSourceLang(data.detectedLanguage);
+        }
+      }
+    } catch {
+      // Ignore background detection errors
+    }
+  };
+
+  // Save / Clear API Key handlers
   const handleSaveApiKey = (key: string) => {
-    const trimmed = (key || '').trim();
+    const trimmed = key.trim();
     setUserApiKey(trimmed);
     localStorage.setItem('gemini_user_api_key', trimmed);
-    showToast(t.keySavedSuccess, 'success');
+    showToast(t.apiKeySaved, 'success');
   };
 
   const handleClearApiKey = () => {
     setUserApiKey('');
     localStorage.removeItem('gemini_user_api_key');
-    showToast(t.keyClearedSuccess, 'info');
+    showToast(t.apiKeyCleared, 'info');
   };
 
-  // Server API: Detect source language
-  const detectSourceLanguageOnServer = async (sampleText: string) => {
-    try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (userApiKey) headers['x-gemini-api-key'] = userApiKey;
+  // Source item modification handler (REQ_2)
+  const handleSourceItemChange = (id: number, field: 'originalText' | 'startTime' | 'endTime', value: string) => {
+    setItems((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          const isTextChanged = field === 'originalText' && value !== item.originalText;
+          let newStartSec = item.startSeconds;
+          let newEndSec = item.endSeconds;
 
-      const res = await fetch('/api/detect-language', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ sampleText }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.languageFa) {
-          setDetectedSourceLang(uiLang === 'en' ? `${data.language}` : `${data.languageFa} (${data.language})`);
+          if (field === 'startTime') {
+            const parsedSec = timestampToSeconds(value);
+            if (!isNaN(parsedSec)) newStartSec = parsedSec;
+          } else if (field === 'endTime') {
+            const parsedSec = timestampToSeconds(value);
+            if (!isNaN(parsedSec)) newEndSec = parsedSec;
+          }
+
+          return {
+            ...item,
+            [field]: value,
+            startSeconds: newStartSec,
+            endSeconds: newEndSec,
+            sourceModified: isTextChanged ? true : item.sourceModified,
+          };
         }
-      }
-    } catch {
-      // Non-blocking fallback
+        return item;
+      })
+    );
+  };
+
+  // Re-translate modified source lines (REQ_2)
+  const handleRetranslateModified = async () => {
+    const modifiedItems = items.filter((item) => item.sourceModified);
+    if (modifiedItems.length === 0) return;
+
+    showToast(uiLang === 'en' ? `Re-translating ${modifiedItems.length} modified line(s)...` : `در حال ترجمه مجدد ${modifiedItems.length} سطر اصلاح‌شده...`, 'info');
+
+    for (const item of modifiedItems) {
+      await handleSingleLineTranslate(item.id);
     }
+
+    // Clear sourceModified flags
+    setItems((prev) =>
+      prev.map((item) => ({ ...item, sourceModified: false }))
+    );
+  };
+
+  // AI Quality Audit & Verification Pass (REQ_1)
+  const [isVerifyingQuality, setIsVerifyingQuality] = useState(false);
+
+  const handleVerifyQuality = async () => {
+    if (items.length === 0) return;
+    setIsVerifyingQuality(true);
+    try {
+      const res = await fetch('/api/verify-translation', {
+        method: 'POST',
+        headers: getApiHeaders(),
+        body: JSON.stringify({
+          items: items.map((i) => ({
+            id: i.id,
+            originalText: i.originalText,
+            translatedText: i.translatedText,
+          })),
+          targetLanguage,
+          tone: selectedTone,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Quality audit failed.');
+      }
+
+      const data = await res.json();
+      const reviewedItems = data.reviewedItems || data.verifiedTranslations;
+      if (reviewedItems && Array.isArray(reviewedItems)) {
+        let refinedCount = 0;
+        const isRTL = RTL_LANGUAGES.includes(targetLanguage);
+
+        setItems((prev) => {
+          const copy = [...prev];
+          reviewedItems.forEach((vt: { id: number; translatedText?: string; text?: string }) => {
+            const idx = copy.findIndex((i) => i.id === vt.id);
+            const textVal = vt.translatedText ?? vt.text;
+            if (idx !== -1 && textVal && textVal !== copy[idx].translatedText) {
+              const finalText = isRTL ? fixRTLPunctuation(textVal) : textVal;
+              copy[idx] = { ...copy[idx], translatedText: finalText };
+              refinedCount++;
+            }
+          });
+          return copy;
+        });
+
+        showToast(
+          uiLang === 'en'
+            ? `Quality audit complete! Refined ${refinedCount} line(s).`
+            : `ارزیابی کیفیت انجام شد! ${refinedCount} سطر بهبود یافت.`,
+          'success'
+        );
+      }
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Error auditing translation quality', 'error');
+    } finally {
+      setIsVerifyingQuality(false);
+    }
+  };
+
+  // Add a new empty subtitle line
+  const handleAddNewLine = () => {
+    setItems((prev) => {
+      const nextId = prev.length > 0 ? Math.max(...prev.map((i) => i.id)) + 1 : 1;
+      const lastItem = prev[prev.length - 1];
+      const newStart = lastItem ? lastItem.endTime : '00:00:00,000';
+      const newEnd = lastItem ? lastItem.endTime : '00:00:05,000';
+      return [
+        ...prev,
+        {
+          id: nextId,
+          startTime: newStart,
+          endTime: newEnd,
+          startSeconds: lastItem ? lastItem.endSeconds : 0,
+          endSeconds: lastItem ? lastItem.endSeconds + 5 : 5,
+          originalText: '',
+          translatedText: '',
+        },
+      ];
+    });
+    showToast(uiLang === 'en' ? 'New subtitle line added' : 'سطر جدید افزوده‌شد', 'info');
+  };
+
+  // Fill empty lines with original text
+  const handleFillEmptyWithOriginal = () => {
+    let count = 0;
+    setItems((prev) =>
+      prev.map((item) => {
+        if (!item.translatedText || !item.translatedText.trim()) {
+          count++;
+          return { ...item, translatedText: item.originalText };
+        }
+        return item;
+      })
+    );
+    showToast(`${count} ${t.emptyLinesFilled}`, 'info');
   };
 
   // Start Batch Translation Process
@@ -178,113 +337,103 @@ export default function App() {
     setIsPaused(false);
     cancelTranslationRef.current = false;
 
-    const isRTL = RTL_LANGUAGES.includes(targetLanguage);
-    const BATCH_SIZE = 50; // Optimal batch chunking of 50 subtitle frames for reliability
-    const total = Math.ceil(items.length / BATCH_SIZE);
-    setTotalBatches(total);
+    const BATCH_SIZE = 35; // 35 lines per Gemini batch (optimized to avoid rate limit quota exhaustion)
+    const totalCount = items.length;
+    const totalBatchesCount = Math.ceil(totalCount / BATCH_SIZE);
+
+    setTotalBatches(totalBatchesCount);
     setCurrentBatch(0);
     setTranslatedCount(0);
 
-    const updatedItems = [...items];
+    const isRTL = RTL_LANGUAGES.includes(targetLanguage);
 
-    for (let i = 0; i < total; i++) {
-      if (cancelTranslationRef.current) {
-        showToast(t.userCancelled, 'warning');
-        break;
-      }
+    for (let b = 0; b < totalBatchesCount; b++) {
+      if (cancelTranslationRef.current) break;
 
-      // Check pause state
+      // Handle pause loop
       while (isPausedRef.current) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
         if (cancelTranslationRef.current) break;
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
       if (cancelTranslationRef.current) break;
 
-      setCurrentBatch(i + 1);
+      setCurrentBatch(b + 1);
 
-      const batchSlice = updatedItems.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE);
-      const payloadItems = batchSlice.map((item) => ({
-        id: item.id,
-        text: item.originalText,
-      }));
+      const startIndex = b * BATCH_SIZE;
+      const batchSlice = items.slice(startIndex, startIndex + BATCH_SIZE);
 
-      const MAX_RETRIES = 3;
-      let batchSuccess = false;
-      let attempts = 0;
-      let batchTranslations: { id: number; text: string }[] = [];
+      let success = false;
+      let attempt = 0;
+      const MAX_RETRIES = 5;
 
-      while (attempts < MAX_RETRIES && !batchSuccess) {
-        attempts++;
-        if (cancelTranslationRef.current) break;
-
-        setRetryInfo({ batch: i + 1, attempt: attempts, maxRetries: MAX_RETRIES });
+      while (!success && attempt < MAX_RETRIES && !cancelTranslationRef.current) {
+        attempt++;
+        if (attempt > 1) {
+          setRetryInfo({ batch: b + 1, attempt, maxRetries: MAX_RETRIES });
+          // Exponential backoff for rate limit quota recovery
+          const backoffDelay = Math.min(attempt * 6000, 30000);
+          showToast(
+            uiLang === 'en'
+              ? `Rate limit backoff: retrying batch ${b + 1} in ${Math.round(backoffDelay / 1000)}s...`
+              : uiLang === 'ar'
+              ? `انتظار تجديد الحصة: جاري إعادة المحاولة خلال ${Math.round(backoffDelay / 1000)} ثوانٍ...`
+              : `توقف کوتاه‌مدت به دلیل محدودیت درخواست: تلاش مجدد دسته ${b + 1} تا ${Math.round(backoffDelay / 1000)} ثانیه دیگر...`,
+            'warning'
+          );
+          await new Promise((resolve) => setTimeout(resolve, backoffDelay));
+        }
 
         try {
-          if (attempts > 1) {
-            // Exponential backoff delay
-            const backoffMs = Math.pow(2, attempts - 2) * 1500;
-            showToast(`${t.retryAttempt} (${attempts}/${MAX_RETRIES}) - ${t.batch} ${i + 1}...`, 'warning');
-            await new Promise((r) => setTimeout(r, backoffMs));
-          }
-
-          if (cancelTranslationRef.current) break;
-
-          const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-          if (userApiKey) reqHeaders['x-gemini-api-key'] = userApiKey;
-
-          const res = await fetch('/api/translate', {
+          const response = await fetch('/api/translate', {
             method: 'POST',
-            headers: reqHeaders,
+            headers: getApiHeaders(),
             body: JSON.stringify({
-              items: payloadItems,
+              items: batchSlice.map((i) => ({ id: i.id, text: i.originalText })),
               sourceLanguage: sourceLanguage === 'auto' ? undefined : sourceLanguage,
               targetLanguage,
               tone: selectedTone,
             }),
           });
 
-          if (!res.ok) {
-            const errData = await res.json().catch(() => ({}));
-            throw new Error(errData.error || `HTTP ${res.status}`);
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || `Server error (${response.status}) during translation.`);
           }
 
-          const data = await res.json();
-          const translationsList: { id: number; text: string }[] = data.translations || [];
+          const data = await response.json();
+          const translationsList: Array<{ id: number; text: string }> = data.translations || [];
 
-          if (!Array.isArray(translationsList)) {
-            throw new Error('Invalid translation response format.');
-          }
+          // Merge translations into state
+          setItems((prevItems) => {
+            const updated = [...prevItems];
+            translationsList.forEach((transObj) => {
+              const targetIndex = updated.findIndex((i) => i.id === transObj.id);
+              if (targetIndex !== -1) {
+                const finalText = isRTL ? fixRTLPunctuation(transObj.text) : transObj.text;
+                updated[targetIndex] = {
+                  ...updated[targetIndex],
+                  translatedText: finalText,
+                };
+              }
+            });
+            return updated;
+          });
 
-          batchTranslations = translationsList;
-          batchSuccess = true;
+          setTranslatedCount((prev) => prev + batchSlice.length);
+          success = true;
+          setRetryInfo(null);
         } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : 'Unknown error';
-          console.error(`Batch ${i + 1} attempt ${attempts} failed:`, msg);
-          if (attempts >= MAX_RETRIES) {
-            showToast(`${t.batch} ${i + 1} failed after ${MAX_RETRIES} retries: ${msg}`, 'error');
+          console.error(`Batch ${b + 1} attempt ${attempt} failed:`, err);
+          if (attempt >= MAX_RETRIES) {
+            const errMsg = err instanceof Error ? err.message : `Batch ${b + 1} failed after ${MAX_RETRIES} attempts.`;
+            showToast(errMsg, 'error');
           }
         }
       }
 
-      setRetryInfo(null);
-
-      if (batchSuccess) {
-        // Apply translations to state items with RTL punctuation fixing if applicable
-        batchTranslations.forEach((tItem) => {
-          const targetIndex = updatedItems.findIndex((item) => item.id === tItem.id);
-          if (targetIndex !== -1 && tItem.text) {
-            const finalText = isRTL ? fixRTLPunctuation(tItem.text) : tItem.text;
-            updatedItems[targetIndex] = {
-              ...updatedItems[targetIndex],
-              translatedText: finalText,
-            };
-          }
-        });
-
-        setItems([...updatedItems]);
-        setTranslatedCount((prev) => prev + batchSlice.length);
-      }
+      // Throttle delay between batches to stay within rate limits
+      await new Promise((resolve) => setTimeout(resolve, 1200));
     }
 
     setIsTranslating(false);
@@ -302,12 +451,9 @@ export default function App() {
     const isRTL = RTL_LANGUAGES.includes(targetLanguage);
 
     try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (userApiKey) headers['x-gemini-api-key'] = userApiKey;
-
       const res = await fetch('/api/translate', {
         method: 'POST',
-        headers,
+        headers: getApiHeaders(),
         body: JSON.stringify({
           items: [{ id: item.id, text: item.originalText }],
           sourceLanguage: sourceLanguage === 'auto' ? undefined : sourceLanguage,
@@ -359,65 +505,46 @@ export default function App() {
         return item;
       })
     );
-    showToast(t.replacedCount.replace('{count}', replacedCount.toString()), 'success');
+    showToast(`${replacedCount} ${t.batchReplacedNotice}`, 'success');
   };
 
-  // Fill Empty Lines With Original
-  const handleFillEmptyWithOriginal = () => {
-    let filled = 0;
-    setItems((prev) =>
-      prev.map((item) => {
-        if (!item.translatedText.trim()) {
-          filled++;
-          return { ...item, translatedText: item.originalText };
-        }
-        return item;
-      })
-    );
-    showToast(t.filledEmptyCount.replace('{count}', filled.toString()), 'info');
-  };
-
-  // Export File Download Handler
+  // Export File Download
   const handleExport = () => {
     if (items.length === 0) return;
 
     const isRTL = RTL_LANGUAGES.includes(targetLanguage);
-    const rawContent = exportSubtitleFile(items, targetFormat, rawHeader, isRTL);
-    const blob = new Blob([rawContent], { type: 'text/plain;charset=utf-8' });
+    const exportedContent = exportSubtitleFile(
+      items,
+      targetFormat,
+      rawHeader,
+      isRTL
+    );
+
+    const blob = new Blob([exportedContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
 
-    const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.')) || fileName || 'Subtitle';
+    const nameWithoutExt = fileName ? fileName.substring(0, fileName.lastIndexOf('.')) || fileName : 'translated_subtitles';
+    link.download = `${nameWithoutExt}_${targetLanguage}.${targetFormat}`;
     link.href = url;
-    link.download = `${nameWithoutExt}_translated.${targetFormat}`;
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    showToast(`.${targetFormat.toUpperCase()} file downloaded.`, 'success');
+    showToast(`${t.subtitleExported} (.${targetFormat.toUpperCase()})`, 'success');
   };
 
-  // Reset Application State
+  // Reset State
   const handleReset = () => {
-    const confirmMsg = uiLang === 'en'
-      ? 'Are you sure you want to unload current subtitles and start new?'
-      : uiLang === 'ar'
-      ? 'هل أنت متأكد من إغلاق الترجمة الحالية والبدء من جدید؟'
-      : 'آیا مایل به خروج از پروژه فعلی و بارگذاری فایل جدید هستید؟';
-
-    if (items.length > 0 && !confirm(confirmMsg)) {
-      return;
-    }
     setItems([]);
     setFileName('');
     setFileSize(0);
     setRawHeader(undefined);
-    setDetectedSourceLang('');
+    setDetectedEncoding('');
+    showToast(t.allDataReset, 'info');
   };
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-900'} transition-colors`}>
+    <div className={`min-h-screen ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors`}>
       
       {/* Top Application Header */}
       <Header
@@ -426,6 +553,7 @@ export default function App() {
         uiLang={uiLang}
         setUiLang={setUiLang}
         onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
+        onOpenHelpModal={() => setIsHelpModalOpen(true)}
         userApiKey={userApiKey}
         onExport={handleExport}
         onReset={handleReset}
@@ -490,13 +618,27 @@ export default function App() {
           />
         )}
 
+        {/* Video Player, AI Extraction & Subtitle Style Customizer */}
+        <VideoSubtitlePreview
+          items={items}
+          onUpdateItems={(newItems) => setItems(newItems)}
+          uiLang={uiLang}
+          userApiKey={userApiKey}
+          onShowToast={showToast}
+        />
+
         {/* Subtitle Editor & Live Preview */}
         {items.length > 0 && (
           <SubtitleEditor
             items={items}
             onItemChange={handleItemChange}
+            onSourceItemChange={handleSourceItemChange}
             onSingleLineTranslate={handleSingleLineTranslate}
+            onRetranslateModified={handleRetranslateModified}
+            onVerifyQuality={handleVerifyQuality}
+            isVerifyingQuality={isVerifyingQuality}
             onDeleteItem={handleDeleteItem}
+            onAddNewLine={handleAddNewLine}
             onBatchReplace={handleBatchReplace}
             onFillEmptyWithOriginal={handleFillEmptyWithOriginal}
             uiLang={uiLang}
@@ -512,6 +654,13 @@ export default function App() {
         userApiKey={userApiKey}
         onSaveKey={handleSaveApiKey}
         onClearKey={handleClearApiKey}
+        uiLang={uiLang}
+      />
+
+      {/* User Guide & Network Warning Modal */}
+      <HelpModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
         uiLang={uiLang}
       />
 

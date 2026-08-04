@@ -513,7 +513,19 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text`
     const start = secondsToASS(item.startSeconds);
     const end = secondsToASS(item.endSeconds);
     const text = (item.translatedText.trim() || item.originalText.trim()).replace(/\n/g, '\\N');
-    const prefix = item.styleTags || `0,${start},${end},Default,,0,0,0,`;
+    let prefix = item.styleTags;
+    if (prefix) {
+      const parts = prefix.split(',');
+      if (parts.length >= 9) {
+        parts[1] = start;
+        parts[2] = end;
+        prefix = parts.join(',');
+      } else {
+        prefix = `0,${start},${end},Default,,0,0,0,`;
+      }
+    } else {
+      prefix = `0,${start},${end},Default,,0,0,0,`;
+    }
     return `Dialogue: ${prefix},${text}`;
   }).join('\n');
 

@@ -31,6 +31,21 @@ export interface SubtitleItem {
   translatedText: string;
   styleTags?: string; // ASS/SSA styling or header tags if any
   isEditing?: boolean;
+  sourceModified?: boolean;
+}
+
+export interface VerifyTranslationRequest {
+  items: SubtitleItem[];
+  targetLanguage: string;
+  tone: ToneOption;
+}
+
+export interface VerifyTranslationResponse {
+  reviewedItems: { id: number; translatedText: string; notes?: string }[];
+  lineCountMatch: boolean;
+  refinedCount: number;
+  untranslatedFixedCount: number;
+  error?: string;
 }
 
 export interface BatchTranslateRequest {

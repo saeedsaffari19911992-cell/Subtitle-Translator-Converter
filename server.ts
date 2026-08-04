@@ -40,6 +40,139 @@ const TONE_PROMPTS: Record<string, string> = {
   educational: 'آموزشی و علمی (رعایت ترمینولوژی تخصصی، صراحت و دقت مستندهای علمی)',
 };
 
+// Helper function to extract array of client API keys from headers or env
+function getClientKeysFromHeader(req: express.Request): string[] {
+  const multiKeysHeader = req.headers['x-gemini-api-keys'] as string;
+  if (multiKeysHeader) {
+    try {
+      const parsed = JSON.parse(multiKeysHeader);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((k) => String(k).trim()).filter(Boolean);
+      }
+    } catch {
+      const splitKeys = multiKeysHeader.split(',').map((k) => k.trim()).filter(Boolean);
+      if (splitKeys.length > 0) return splitKeys;
+    }
+  }
+
+  const singleKeyHeader = req.headers['x-gemini-api-key'] as string;
+  if (singleKeyHeader && singleKeyHeader.trim()) {
+    return [singleKeyHeader.trim()];
+  }
+
+  if (process.env.GEMINI_API_KEY) {
+    return [process.env.GEMINI_API_KEY.trim()];
+  }
+
+  return [];
+}
+
+// Helper function to execute Gemini requests with multi-key rotation, model fallback, and rate-limit backoff
+async function callGeminiWithRetryAndFallback(
+  apiKeys: string[],
+  generateParams: {
+    contents: any;
+    config?: any;
+  }
+) {
+  const rawKeys = apiKeys.length > 0 ? apiKeys : [];
+  const keysToTry: string[] = [];
+  rawKeys.forEach((k) => {
+    const trimmed = String(k || '').trim();
+    if (trimmed && !keysToTry.includes(trimmed)) {
+      keysToTry.push(trimmed);
+    }
+  });
+
+  if (process.env.GEMINI_API_KEY) {
+    const envKey = process.env.GEMINI_API_KEY.trim();
+    if (envKey && !keysToTry.includes(envKey)) {
+      keysToTry.push(envKey);
+    }
+  }
+
+  if (keysToTry.length === 0) {
+    throw new Error('کلید API جمینای تنظیم نشده است. لطفاً کلید API خود را وارد کنید.');
+  }
+
+  const models = ['gemini-3.6-flash', 'gemini-2.5-flash'];
+  let lastError: any = null;
+
+  for (let kIdx = 0; kIdx < keysToTry.length; kIdx++) {
+    const currentKey = keysToTry[kIdx];
+    if (!currentKey) continue;
+
+    let ai: GoogleGenAI;
+    try {
+      ai = getGenAIClient(currentKey);
+    } catch (e) {
+      lastError = e;
+      continue;
+    }
+
+    for (let mIdx = 0; mIdx < models.length; mIdx++) {
+      const modelName = models[mIdx];
+      let attempts = 0;
+      const maxAttemptsPerModel = 2;
+
+      while (attempts < maxAttemptsPerModel) {
+        attempts++;
+        try {
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: generateParams.contents,
+            config: generateParams.config,
+          });
+          return response;
+        } catch (err: any) {
+          const msg = err?.message || String(err);
+          const is404 = msg.includes('404') || msg.toLowerCase().includes('not found');
+
+          if (!is404 || !lastError) {
+            lastError = err;
+          }
+
+          const isRateLimit =
+            msg.includes('429') ||
+            msg.toLowerCase().includes('quota') ||
+            msg.toLowerCase().includes('resource_exhausted');
+
+          if (isRateLimit) {
+            // 1. If we have more API keys, failover to the next key immediately
+            if (kIdx < keysToTry.length - 1) {
+              console.warn(`[Gemini Rate Limit] Key #${kIdx + 1} exhausted quota. Switching to Key #${kIdx + 2}...`);
+              break; // exit model loop to try next key in outer loop
+            }
+
+            // 2. If we have more models to try, failover to the next model immediately
+            if (mIdx < models.length - 1 && attempts >= 1) {
+              console.warn(`[Gemini Rate Limit] Model ${modelName} rate limited. Falling back to ${models[mIdx + 1]}...`);
+              break; // exit attempts loop to try next model in inner loop
+            }
+
+            // 3. Otherwise wait for requested retry duration or exponential backoff
+            let delayMs = 5000;
+            const match = msg.match(/retry in ([0-9.]+)s/i);
+            if (match && match[1]) {
+              const parsedSec = parseFloat(match[1]);
+              if (!isNaN(parsedSec) && parsedSec > 0) {
+                delayMs = Math.min(Math.ceil(parsedSec * 1000) + 1000, 65000);
+              }
+            }
+            console.warn(`[Gemini Rate Limit] Model: ${modelName}, Key: #${kIdx + 1}, Attempt: ${attempts}/${maxAttemptsPerModel}. Waiting ${Math.round(delayMs / 1000)}s...`);
+            await new Promise((resolve) => setTimeout(resolve, delayMs));
+          } else {
+            // Non-rate-limit error (e.g. 404 or bad syntax), move to next model
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  throw lastError || new Error('خطا در ارتباط با هوش مصنوعی. لطفاً کلید API جمینای خود را در تنظیمات بررسی یا به‌روزرسانی کنید.');
+}
+
 // API Endpoint: Translate batch of subtitle items
 app.post('/api/translate', async (req, res) => {
   try {
@@ -49,8 +182,7 @@ app.post('/api/translate', async (req, res) => {
       return res.status(400).json({ error: 'آیتمی برای ترجمه ارسال نشده است.' });
     }
 
-    const userApiKey = (req.headers['x-gemini-api-key'] as string) || undefined;
-    const ai = getGenAIClient(userApiKey);
+    const apiKeys = getClientKeysFromHeader(req);
     const toneDescription = TONE_PROMPTS[tone] || TONE_PROMPTS.cinematic;
 
     const systemInstruction = `You are an expert subtitle translator and localization specialist.
@@ -71,8 +203,7 @@ Your primary job is to translate subtitle text blocks accurately, fluidly, and n
     const promptText = `Translate the following ${items.length} subtitle lines to ${targetLanguage} (Source language: ${sourceLanguage || 'Auto-detect'}):\n` +
       JSON.stringify(items, null, 2);
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
+    const response = await callGeminiWithRetryAndFallback(apiKeys, {
       contents: promptText,
       config: {
         systemInstruction,
@@ -150,6 +281,94 @@ Your primary job is to translate subtitle text blocks accurately, fluidly, and n
   }
 });
 
+// API Endpoint: Post-translation quality audit & verification pass (REQ_1)
+app.post('/api/verify-translation', async (req, res) => {
+  try {
+    const { items, targetLanguage, tone } = req.body;
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'آیتمی برای ارزیابی کیفیت ارسال نشده است.' });
+    }
+
+    const apiKeys = getClientKeysFromHeader(req);
+    const toneDescription = TONE_PROMPTS[tone] || TONE_PROMPTS.cinematic;
+
+    const systemInstruction = `You are a chief subtitle editor and QA auditor.
+Your job is to perform a post-translation verification pass on translated subtitle lines into ${targetLanguage}.
+
+AUDIT RULES:
+1. LINE COUNT EQUALITY: You MUST return a translation object for EVERY input item ID provided. The output length MUST equal ${items.length}.
+2. FIX UNTRANSLATED/MISSING LINES: If any line has empty translated text or remains untranslated in English/foreign words when it should be in ${targetLanguage}, translate it accurately.
+3. REFINE NATURAL PHRASING: Polish literal or unnatural sentences into smooth, native, conversational phrasing matching the "${toneDescription}" tone.
+4. TIMING & LENGTH: Keep line length concise so viewer reading speeds are respected.
+5. JSON OUTPUT: Return a JSON object containing "reviewedItems": array of objects { "id": number, "translatedText": string }.`;
+
+    const promptText = `Audit, verify and refine these ${items.length} translated subtitle lines into ${targetLanguage}:\n` +
+      JSON.stringify(
+        items.map((i: any) => ({
+          id: i.id,
+          originalText: i.originalText,
+          translatedText: i.translatedText,
+        })),
+        null,
+        2
+      );
+
+    const response = await callGeminiWithRetryAndFallback(apiKeys, {
+      contents: promptText,
+      config: {
+        systemInstruction,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            reviewedItems: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  id: { type: Type.INTEGER },
+                  translatedText: { type: Type.STRING },
+                },
+                required: ['id', 'translatedText'],
+              },
+            },
+          },
+          required: ['reviewedItems'],
+        },
+      },
+    });
+
+    const parsedData = JSON.parse(response.text || '{}');
+    const reviewedItems = parsedData.reviewedItems || [];
+
+    let refinedCount = 0;
+    let untranslatedFixedCount = 0;
+
+    reviewedItems.forEach((rev: any) => {
+      const orig = items.find((i: any) => i.id === rev.id);
+      if (orig) {
+        if (!orig.translatedText.trim() && rev.translatedText.trim()) {
+          untranslatedFixedCount++;
+        } else if (orig.translatedText.trim() !== rev.translatedText.trim()) {
+          refinedCount++;
+        }
+      }
+    });
+
+    return res.json({
+      reviewedItems,
+      lineCountMatch: reviewedItems.length === items.length,
+      refinedCount,
+      untranslatedFixedCount,
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error during translation quality audit.';
+    console.error('Verify translation error:', err);
+    return res.status(500).json({ error: message });
+  }
+});
+
 // API Endpoint: Detect source language of text sample
 app.post('/api/detect-language', async (req, res) => {
   try {
@@ -158,10 +377,8 @@ app.post('/api/detect-language', async (req, res) => {
       return res.status(400).json({ error: 'متن نمونه ارسال نشده است.' });
     }
 
-    const userApiKey = (req.headers['x-gemini-api-key'] as string) || undefined;
-    const ai = getGenAIClient(userApiKey);
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
+    const apiKeys = getClientKeysFromHeader(req);
+    const response = await callGeminiWithRetryAndFallback(apiKeys, {
       contents: `Identify the primary language of this subtitle snippet. Return a JSON object with keys "language" (English name e.g. "English", "French", "Japanese") and "languageFa" (Persian name e.g. "انگلیسی", "فرانسوی", "ژاپنی").\n\nSnippet:\n${sampleText.slice(0, 1000)}`,
       config: {
         responseMimeType: 'application/json',
@@ -184,25 +401,177 @@ app.post('/api/detect-language', async (req, res) => {
   }
 });
 
-// API Endpoint: Test Gemini API key validity
-app.post('/api/test-key', async (req, res) => {
+// API Endpoint: Transcribe audio to SRT subtitles
+app.post('/api/transcribe-audio', async (req, res) => {
   try {
-    const customKey = req.body?.apiKey || (req.headers['x-gemini-api-key'] as string);
-    const ai = getGenAIClient(customKey);
-    
-    // Quick test prompt
-    await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
-      contents: 'Respond with OK if connected.',
+    const { audioBase64, mimeType, targetLanguage, highAccuracyMode } = req.body;
+
+    if (!audioBase64) {
+      return res.status(400).json({ error: 'داده صوتی ارسال نشده است.' });
+    }
+
+    const apiKeys = getClientKeysFromHeader(req);
+
+    const highAccuracyInstruction = highAccuracyMode
+      ? `\nHIGH ACCURACY MULTI-PASS RE-EVALUATION MODE:
+- Perform deep phonetic analysis on low-volume, fast-paced, background-noisy, or heavily accented dialogue.
+- Cross-verify homophones, slang, technical jargon, and ambiguous vocal pronunciations against semantic context.
+- Ensure strict accuracy for subtle speech pauses and spoken phrasing.`
+      : '';
+
+    const systemInstruction = `You are a world-class speech-to-text subtitle transcription AI.
+Your task is to transcribe speech from the provided audio file into a clean, precise, professional SRT subtitle format.${highAccuracyInstruction}
+
+CRITICAL INSTRUCTIONS:
+1. TIMESTAMPS: Every block MUST have valid SRT timestamps formatted as "HH:MM:SS,mmm --> HH:MM:SS,mmm" (e.g., "00:00:01,250 --> 00:00:04,100").
+2. ACCURACY & NATURAL BREAKS: Break subtitle lines naturally at natural speech pauses, clauses, or sentences. Avoid overly long subtitle blocks.
+3. OUTPUT FORMAT: Return a JSON object with keys "srtText" (string containing full, valid SRT content) and "detectedLanguage" (string describing spoken language).`;
+
+    const promptText = highAccuracyMode
+      ? `[HIGH ACCURACY PHONETIC RE-EVALUATION] Transcribe the speech with meticulous attention to phonetic detail, accents, and context into SRT format. ${targetLanguage ? `Translate or write transcript in ${targetLanguage}.` : 'Keep transcript in original spoken language.'}`
+      : `Transcribe the audio speech into precise SRT subtitle format. ${targetLanguage ? `Translate or write transcript in ${targetLanguage}.` : 'Keep transcript in original spoken language.'}`;
+
+    const response = await callGeminiWithRetryAndFallback(apiKeys, {
+      contents: [
+        {
+          inlineData: {
+            data: audioBase64,
+            mimeType: mimeType || 'audio/wav',
+          },
+        },
+        promptText,
+      ],
+      config: {
+        systemInstruction,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            detectedLanguage: { type: Type.STRING },
+            srtText: { type: Type.STRING },
+          },
+          required: ['srtText'],
+        },
+      },
     });
 
-    return res.json({ success: true, message: 'API Key is valid and active.' });
+    const parsedData = JSON.parse(response.text || '{}');
+    return res.json(parsedData);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Invalid API Key or connection error.';
-    console.error('API key test error:', err);
-    return res.status(400).json({ success: false, error: message });
+    const message = err instanceof Error ? err.message : 'Error transcribing audio';
+    console.error('Audio transcription error:', err);
+    return res.status(500).json({ error: message });
   }
 });
+
+// Helper to parse and categorize Gemini API errors into user-friendly diagnostic messages
+function parseGeminiDiagnosticError(err: any): string {
+  if (!err) return 'ارتباط برقرار نشد: خطای نامشخص در سرویس هوش مصنوعی.';
+  const msg = typeof err === 'string' ? err : err.message || String(err);
+  const lowerMsg = msg.toLowerCase();
+
+  if (
+    lowerMsg.includes('429') ||
+    lowerMsg.includes('quota') ||
+    lowerMsg.includes('resource_exhausted') ||
+    lowerMsg.includes('limit')
+  ) {
+    return 'محدودیت تعداد درخواست (Quota/Rate Limit): سهمیه مجاز این کلید به پایان رسیده است یا باید چند لحظه صبر کنید.';
+  }
+
+  if (
+    lowerMsg.includes('401') ||
+    lowerMsg.includes('403') ||
+    lowerMsg.includes('api_key') ||
+    lowerMsg.includes('unauthorized') ||
+    lowerMsg.includes('invalid') ||
+    lowerMsg.includes('permission_denied')
+  ) {
+    return 'کلید API خرابه یا نامعتبر است: کلید وارد شده اشتباه است، یا دسترسی آن از سوی گوگل مسدود گردیده.';
+  }
+
+  if (
+    lowerMsg.includes('econnrefused') ||
+    lowerMsg.includes('enotfound') ||
+    lowerMsg.includes('fetch failed') ||
+    lowerMsg.includes('network') ||
+    lowerMsg.includes('timeout')
+  ) {
+    return 'ارتباط برقرار نشد: خطای شبکه یا عدم دسترسی به سرورهای گوگل.';
+  }
+
+  return `ارتباط برقرار نشد: ${msg}`;
+}
+
+// Helper to perform a fast, direct test on a single Gemini API key without retry delays
+async function testSingleGeminiKey(keyStr: string): Promise<{ success: boolean; error?: string }> {
+  const cleanKey = String(keyStr || '').trim();
+  if (!cleanKey) {
+    return { success: false, error: 'کلید API خالی است.' };
+  }
+
+  let ai: GoogleGenAI;
+  try {
+    ai = getGenAIClient(cleanKey);
+  } catch (err: any) {
+    return { success: false, error: parseGeminiDiagnosticError(err) };
+  }
+
+  const modelsToTest = ['gemini-3.6-flash', 'gemini-2.5-flash'];
+  let lastErr: any = null;
+
+  for (const modelName of modelsToTest) {
+    try {
+      await ai.models.generateContent({
+        model: modelName,
+        contents: 'Respond with OK',
+      });
+      return { success: true };
+    } catch (err: any) {
+      lastErr = err;
+      const msg = err?.message || String(err);
+      const is404 = msg.includes('404') || msg.toLowerCase().includes('not found');
+      if (is404) continue; // Try fallback model if 404
+      break; // For rate limit, auth errors, etc., stop immediately for diagnostic speed
+    }
+  }
+
+  return { success: false, error: parseGeminiDiagnosticError(lastErr) };
+}
+
+// API Endpoint: Test single or batch Gemini API key validity
+app.post('/api/test-key', async (req, res) => {
+  try {
+    const { apiKey, apiKeys } = req.body || {};
+
+    if (Array.isArray(apiKeys) && apiKeys.length > 0) {
+      const results = await Promise.all(
+        apiKeys.map(async (k: string) => {
+          const resObj = await testSingleGeminiKey(k);
+          return { key: k, success: resObj.success, error: resObj.error };
+        })
+      );
+      return res.json({ success: true, results });
+    }
+
+    const customKey = String(apiKey || req.headers['x-gemini-api-key'] || '').trim();
+    if (!customKey) {
+      return res.status(400).json({ success: false, error: 'کلید API وارد نشده است.' });
+    }
+
+    const result = await testSingleGeminiKey(customKey);
+    if (result.success) {
+      return res.json({ success: true, message: 'ارتباط برقرار شد و کلید API معتبر است.' });
+    } else {
+      return res.status(400).json({ success: false, error: result.error });
+    }
+  } catch (err: unknown) {
+    const errorMsg = parseGeminiDiagnosticError(err);
+    console.error('API key test error:', err);
+    return res.status(400).json({ success: false, error: errorMsg });
+  }
+});
+
 
 // Health check route
 app.get('/api/health', (req, res) => {

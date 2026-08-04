@@ -91,12 +91,12 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
   };
 
   return (
-    <div className="w-full bg-slate-900/80 rounded-2xl border border-slate-800 p-5 lg:p-6 shadow-xl backdrop-blur-sm flex flex-col gap-6">
+    <div className="w-full bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 lg:p-6 shadow-md dark:shadow-xl backdrop-blur-sm flex flex-col gap-6 transition-colors">
       
       {/* Title */}
-      <div className="flex items-center gap-2 pb-3 border-b border-slate-800">
-        <Languages className="w-5 h-5 text-indigo-400" />
-        <h2 className="text-base font-bold text-white">
+      <div className="flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
+        <Languages className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+        <h2 className="text-base font-bold text-slate-900 dark:text-white">
           {t.subtitleSettings}
         </h2>
       </div>
@@ -120,7 +120,7 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
             type="button"
             onClick={handleSwapLanguages}
             disabled={sourceLanguage === 'auto'}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-300 hover:text-white border border-slate-700 transition-colors"
+            className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-40 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-300 dark:border-slate-700 transition-colors"
             title="Swap Source and Target Languages"
           >
             <ArrowLeftRight className="w-4 h-4" />
@@ -140,8 +140,8 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
 
       {/* Tone Selection Cards */}
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
-          <MessageSquareQuote className="w-4 h-4 text-purple-400" />
+        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <MessageSquareQuote className="w-4 h-4 text-purple-600 dark:text-purple-400" />
           <span>{t.translationTone}:</span>
         </label>
 
@@ -154,24 +154,24 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
                 onClick={() => setSelectedTone(tone.id)}
                 className={`p-3 rounded-xl border cursor-pointer transition-all duration-200 flex flex-col justify-between gap-2 relative overflow-hidden ${
                   isSelected
-                    ? 'bg-indigo-600/15 border-indigo-500 ring-2 ring-indigo-500/20 text-white shadow-lg shadow-indigo-950/50'
-                    : 'bg-slate-950/40 border-slate-800/80 hover:border-slate-700 text-slate-400 hover:text-slate-200'
+                    ? 'bg-indigo-50 dark:bg-indigo-600/15 border-indigo-500 ring-2 ring-indigo-500/20 text-slate-900 dark:text-white shadow-md'
+                    : 'bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`p-1.5 rounded-lg ${isSelected ? 'bg-indigo-500/20 text-indigo-300' : 'bg-slate-800 text-slate-400'}`}>
+                  <span className={`p-1.5 rounded-lg ${isSelected ? 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-300' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
                     {getToneIcon(tone.iconName)}
                   </span>
                   {isSelected && (
-                    <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-indigo-500 dark:bg-indigo-400 animate-pulse" />
                   )}
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-bold text-white">
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">
                     {getToneLabel(tone.id)}
                   </h4>
-                  <p className="text-[10px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                     {getToneDescription(tone.id)}
                   </p>
                 </div>
@@ -182,15 +182,15 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
       </div>
 
       {/* Target Export Format & Start Action */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-800">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
         
         {/* Export Format selector */}
         <div className="flex items-center gap-2 text-xs w-full sm:w-auto">
-          <FileType className="w-4 h-4 text-indigo-400 shrink-0" />
-          <span className="text-slate-300 font-medium">
+          <FileType className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+          <span className="text-slate-700 dark:text-slate-300 font-semibold">
             {t.outputFormat}
           </span>
-          <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
             {(['srt', 'vtt', 'ass', 'ssa', 'sub'] as SubtitleFormat[]).map((fmt) => (
               <button
                 key={fmt}
@@ -199,7 +199,7 @@ export const ConfigPanel: React.FC<ConfigPanelProps> = ({
                 className={`uppercase text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg transition-colors ${
                   targetFormat === fmt
                     ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800'
                 }`}
               >
                 .{fmt}
