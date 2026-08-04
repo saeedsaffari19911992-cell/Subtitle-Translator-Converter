@@ -8,7 +8,6 @@
 
 ---
 
-## فارسی {#فارسی}
 
 # Subtitle-Translator-Converter 🎬📝 (نسخه فارسی)
 ...
