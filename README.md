@@ -1,47 +1,25 @@
-<div id="بالا"></div>
-
-<p align="center">
-  <a href="#فارسی">فارسی</a> | 
-  <a href="#english">English</a> | 
-  <a href="#العربية">العربية</a>
-</p>
+[فارسی](#فارسی) | [English](#english) | [العربية](#العربية)
 
 ---
 
+<div id="فارسی"></div>
 
 # Subtitle-Translator-Converter 🎬📝 (نسخه فارسی)
-...
+
 خسته شدی از ترجمه‌های بی‌روح، ماشینی و کلمه به کلمه‌ی گوگل ترنسلیت؟ یا سایت‌های ترجمه زیرنویسی که هم کلی تبلیغ دارند و هم آخرش یک فایل خراب و بی‌معنی تحویلت می‌دهند؟ 🙄
 
 این پروژه اینجاست تا کار را تمام کند! **Subtitle-Translator-Converter** به شما اجازه می‌دهد کاملاً **رایگان**، فیلم‌ها، سریال‌ها و ویدیوهای آموزشی محبوبتان را به **بیش از ۵۰ زبان مختلف دنیا** و با دقیق‌ترین و طبیعی‌ترین لحن ممکن ترجمه کنید. چطوری؟ با قدرت هوش مصنوعی **Gemini** که اصطلاحات و ریزه‌کاری‌های زبان را مثل یک مترجم انسان می‌فهمد! 😎
 
 ---
 
-## 🆕 قابلیت‌های جدید نسخه اخیر
-
-- **🔑 پشتیبانی از چند کلید API به‌صورت هم‌زمان:** دیگر نگران لیمیت‌شدن یا خراب‌شدن کلید API نباشید! می‌توانید چند کلید Gemini را همزمان به برنامه بدهید و اگر یکی از کلیدها به لیمیت خورد یا با خطا مواجه شد، برنامه به‌صورت خودکار سراغ کلید بعدی می‌رود و روند ترجمه بدون وقفه ادامه پیدا می‌کند.
-- **🎬 تولید خودکار زیرنویس از روی ویدیو (Speech-to-Subtitle):** یکی از بزرگ‌ترین قابلیت‌های این نسخه! کافیست یک ویدیوی بدون زیرنویس (به هر زبانی) را به برنامه بدهید؛ برنامه به‌صورت خودکار گفتار ویدیو را تشخیص داده و یک فایل زیرنویس برایش می‌سازد. از همان‌جا می‌توانید همین زیرنویس تازه‌ساخته‌شده را به هر زبان دیگری ترجمه کنید یا هر ویرایش دیگری روی آن انجام دهید.
-- **▶️ پلیر پیش‌نمایش داخلی:** یک پلیر ویدیوی داخلی به برنامه اضافه شده که با آن می‌توانید همان لحظه ببینید زیرنویس روی ویدیو چطور نمایش داده می‌شود؛ تایمینگ، هماهنگی و ظاهر زیرنویس را قبل از خروجی نهایی به‌راحتی بررسی و تأیید کنید.
-- **🎨 شخصی‌سازی کامل ظاهر زیرنویس:** بخش جدیدی اضافه شده که به شما اجازه می‌دهد فونت، رنگ متن، اندازه نوشته، رنگ/شفافیت پس‌زمینه و سایه‌ی زیرنویس را دقیقاً مطابق سلیقه‌ خودتان تنظیم کنید.
-- **📖 بخش راهنمای کاربر:** یک بخش راهنمای داخلی به برنامه اضافه شده تا استفاده از تمام قابلیت‌ها، به‌خصوص برای کاربران تازه‌کار، ساده و بدون سردرگمی باشد.
-- **✏️ ویرایش و بازتولید متن:** اگر جایی از ترجمه یا زیرنویس تولیدشده دقیق نبود یا دوست داشتید تغییرش بدهید، می‌توانید مستقیماً متن را ویرایش کنید و دوباره برای همان بخش تولید (Regenerate) بگیرید؛ بدون نیاز به شروع دوباره کل فرآیند.
-
----
-
 ## ✨ چرا این برنامه یک سر و گردن از بقیه بالاتر است؟
 
 - **🌍 پشتیبانی از بیش از ۵۰ زبان دنیا:** فرقی نمی‌کند زیرنویس شما انگلیسی، کره‌ای، فرانسوی، اسپانیایی یا هر زبان دیگری باشد؛ برنامه به راحتی آن را به فارسی یا بیش از ۵۰ زبان زنده دیگر ترجمه می‌کند.
-- **🎬 ساخت زیرنویس از روی ویدیوی بدون زیرنویس:** حتی اگر اصلاً فایل زیرنویس ندارید، کافیست ویدیو را بدهید تا برنامه خودش زیرنویس بسازد و سپس آن را ترجمه کنید.
-- **▶️ پلیر پیش‌نمایش زیرنویس روی ویدیو:** پیش از خروجی گرفتن، مطمئن شوید زیرنویس دقیقاً همان‌طور که می‌خواهید روی ویدیو می‌نشیند.
-- **🎨 شخصی‌سازی فونت، رنگ، اندازه و پس‌زمینه:** زیرنویس را کاملاً مطابق سلیقه خودتان استایل بدهید.
-- **🔑 چند کلید API با سوییچ خودکار:** اگر یک کلید لیمیت بخورد یا خطا بدهد، برنامه خودکار به کلید بعدی می‌رود و کارتان متوقف نمی‌شود.
 - **🎭 انتخاب لحن ترجمه (قابلیت اختصاصی):** قبل از شروع می‌توانید لحن ترجمه را دقیقاً متناسب با ویدیوی خودتان انتخاب کنید:
   * 🍿 **سینمایی و درام:** برای فیلم‌ها و سریال‌های جدی.
   * 😂 **کمدی و عامیانه:** برای سیتکام‌ها و فیلم‌های طنز (ترجمه اصطلاحات و شوخی‌ها).
   * 🎓 **آموزشی و تخصصی:** برای کورس‌ها، یوتیوب و ویدیوهای علمی.
   * 👔 **رسمی و کتابی:** برای مستندها و ویدیوهای شرکتی.
-- **📖 راهنمای کاربر داخل برنامه:** دیگر نیازی نیست دنبال آموزش بگردید؛ همه‌چیز در خود برنامه توضیح داده شده.
-- **✏️ اصلاح و بازتولید متن:** هر بخش از متن که به دلتان ننشست را ویرایش کنید و همان قسمت را دوباره تولید کنید؛ خیلی کاربردی برای رسیدن به بهترین نتیجه.
 - **🔑 بدون نیاز به تنظیمات سخت کدنویسی:** لازم نیست بروید فایل‌های سیستم را دستکاری کنید! برنامه را که باز کنید، خیلی راحت یک دکمه وجود دارد؛ کلید API رایگان جمنای خود را درون کادر وارد می‌کنید و تمام!
 - **💰 ۱۰۰٪ رایگان و بدون تبلیغات:** نیازی به خرید اشتراک یا دیدن بنرهای اعصاب‌خردکن نیست. مستقیم و بی‌واسطه با API خودتان کار می‌کند.
 - **⏱️ حفظ کامل زمان‌بندی (Timing):** ساختار فایل زیرنویس شما دقیقاً حفظ می‌شود و زمان‌بندی‌ها حتی یک میلی‌ثانیه هم جابه‌جا نمی‌شوند.
@@ -50,19 +28,25 @@
 
 ## ⚠️ نکات بسیار مهم (قبل از شروع)
 
-💡 **کیفیت بالا زمان می‌برد!** به دلیل اینکه هوش مصنوعی جمنای تک‌تک جملات را با دقت بالا پردازش می‌کند و لحن انتخابی شما را روی متن اعمال می‌کند، فرآیند ترجمه **ممکن است کمی طول بکشد**. این زمان بسته به **حجم زیرنویس، سرعت اینترنت و کشش سیستم شما** متغیر است. پس اگر دیدید پردازش طولانی شد، اصلاً نگران نباشید و صبور باشید؛ برنامه دارد کارش را دقیق انجام می‌دهد! ☕️✨
+💡 **کیفیت بالا زمان می‌برد!** به دلیل اینکه هوش مصنوعی جمنای تک‌تک جملات را با دقت بالا پردازش می‌کند و لحن انتخابی شما را روی متن اعمال می‌کند، فرآیند ترجمه **ممکن است کمی طول بکشد**. این زمان بسته به **حجم زیرنویس, سرعت اینترنت و کشش سیستم شما** متغیر است. پس اگر دیدید پردازش طولانی شد، اصلاً نگران نباشید و صبور باشید؛ برنامه دارد کارش را دقیق انجام می‌دهد! ☕️✨
 
 🛑 **راهنمای کاربران داخل ایران (رفع تحریم):** از آنجایی که شرکت گوگل و هوش مصنوعی جمنای آی‌پی‌های ایران را مسدود کرده‌اند، برای استفاده از برنامه **حتماً باید از یک وی‌پی‌ان (VPN) مناسب استفاده کنید**. توجه داشته باشید که فیلترشکن شما باید روی حالت **تان مود (TUN Mode)** فعال باشد (برای مثال قابلیت **TUN Mode در نرم‌افزار V2ray** کاملاً کفایت می‌کند و پاسخگو است).
 
-🎬 **نکته مهم درباره ساخت زیرنویس برای ویدیوهای طولانی:** تولید زیرنویس از روی ویدیو، به‌خصوص برای ویدیوهای طولانی، توکن زیادی از حساب Gemini شما مصرف می‌کند. اگر قصد دارید برای یک ویدیوی طولانی زیرنویس بسازید، حتماً یکی از این دو راه را در پیش بگیرید: یا **چند کلید API** به‌صورت هم‌زمان وارد کنید تا برنامه بین آن‌ها سوییچ کند، یا از یک **کلید API پولی (Paid) جمنای** استفاده کنید تا با محدودیت یا قطع‌شدن روند مواجه نشوید.
+---
 
-💡 **پیشنهاد برای سرعت و دقت بیشتر:** اگر ویدیوی شما از قبل یک زیرنویس خوب و دقیق به یک زبان دیگر دارد (مثلاً انگلیسی)، به‌جای اینکه از برنامه بخواهید از روی صدای ویدیو زیرنویس تازه بسازد، همان فایل زیرنویس موجود را مستقیماً به برنامه بدهید تا به زبان دلخواه شما ترجمه کند. این کار هم توکن کمتری مصرف می‌کند و هم نتیجه دقیق‌تری می‌دهد.
+## 🌐 استفاده آنلاین (بدون نیاز به نصب)
+
+اگه با نصب محلی و کار کردن با CMD حال نمی‌کنید، خبری نیست! یک نسخه‌ی آنلاین و آماده هم در دسترسه که دقیقاً همون امکانات نسخه‌ی محلی رو داره، بدون نیاز به نصب هیچ برنامه‌ای. این نسخه مخصوصاً طوری طراحی شده که هم روی موبایل و هم روی سیستم به‌راحتی کار کنه؛ کافیه لینک زیر رو باز کنید و شروع کنید:
+
+🔗 [https://subtitle-translator-online-production.up.railway.app](https://subtitle-translator-online-production.up.railway.app)
+
+> ℹ️ **توجه:** این لینک تقریباً تا **۳۰ روز** معتبر است و پس از آن به‌روزرسانی می‌شود و لینک جدید جایگزین آن خواهد شد. اگه لینک بالا کار نکرد، یعنی به‌روزرسانی شده؛ سری به همین صفحه بزنید تا آدرس جدید رو ببینید.
 
 ---
 
-## 📦 راهنمای گام‌به‌گام و آسانِ اجرای برنامه
+## 📦 راهنمای گام‌به‌گام و آسانِ اجرای برنامه (نصب محلی)
 
-برای اجرای برنامه روی سیستم خود، این مراحل ساده را به ترتیب انجام دهید:
+اگه ترجیح می‌دید برنامه رو روی سیستم خودتان اجرا کنید، این مراحل ساده را به ترتیب انجام دهید:
 
 ### پیش‌نیاز
 
@@ -98,14 +82,14 @@ npm run dev
 http://localhost:3000
 ```
 
-**توجه:** برای استفاده از برنامه، پنجره ترمینال (CMD) حتماً باید باز بماند. حالا کلید (یا کلیدهای) API خود را وارد کنید، لحن دلخواهتان را بسنجید، زیرنویس یا ویدیوی خودتان را آپلود کنید، ظاهر زیرنویس را شخصی‌سازی کنید و در پلیر پیش‌نمایش نتیجه را ببینید و تمام! 🚀
+**توجه:** برای استفاده از برنامه، پنجره ترمینال (CMD) حتماً باید باز بماند. حالا کلید API خود را وارد کنید، لحن دلخواهتان را بسنجید، زیرنویس را آپلود کنید و تمام! 🚀
 
 ---
 
 ## 🛠️ تکنولوژی‌های به‌کاررفته (Tech Stack)
 
 - **Frontend:** React / Vite / TypeScript
-- **AI Engine:** Google Gemini API (پشتیبانی از چند کلید API)
+- **AI Engine:** Google Gemini API
 - **Runtime:** Node.js
 
 ---
@@ -113,12 +97,6 @@ http://localhost:3000
 ## 🤝 مشارکت در پروژه
 
 اگر توسعه‌دهنده هستی و دوست داری لحن‌های جدیدی اضافه کنی یا قابلیت‌های بیشتری به بخش کانورتر بیاوری، با آغوش باز از Pull Request‌های شما استقبال می‌شود! لایک و Star به پروژه یادت نره! ⭐
-
-[⬆️ بازگشت به بالا](#بالا)
-
-<br><br><br>
-<!-- ایجاد فاصله برای تجربه کاربری بهتر هنگام اسکرول -->
-<br><br><br>
 
 ---
 
@@ -132,32 +110,15 @@ This project is here to change the game! **Subtitle-Translator-Converter** allow
 
 ---
 
-## 🆕 What's New
-
-- **🔑 Multiple API Keys with Automatic Failover:** No more worries about hitting rate limits or a dead key! Add several Gemini API keys at once, and if one gets rate-limited or errors out, the app automatically switches to the next key so your translation never stops.
-- **🎬 Automatic Subtitle Generation from Video (Speech-to-Subtitle):** One of the biggest additions in this release! Simply upload a video that has no subtitles at all (in any language), and the app automatically detects the speech and generates a subtitle file for it. From there you can translate that freshly generated subtitle into any language or edit it however you like.
-- **▶️ Built-in Preview Player:** A video player has been added so you can instantly preview how the subtitles look on top of your video — check timing, sync, and appearance before exporting the final file.
-- **🎨 Full Subtitle Style Customization:** A new section lets you customize the subtitle's font, text color, size, background color/opacity, and shadow exactly the way you like.
-- **📖 Built-in Help/Guide Section:** An in-app guide has been added to make using every feature easier, especially for first-time users.
-- **✏️ Text Editing & Regeneration:** If part of a translation or generated subtitle isn't quite right, you can edit the text directly and regenerate just that part — no need to restart the whole process.
-
----
-
 ## ✨ Why Choose This Tool?
 
 - **🌍 50+ Languages Supported:** Whether your subtitle is in English, Korean, French, Spanish, or any other language, you can easily translate it into Persian or over 50 living languages worldwide.
-- **🎬 Generate Subtitles from Videos with No Subtitles:** Even without a subtitle file, just upload the video and let the app create one for you, ready to translate.
-- **▶️ Live Preview Player:** Verify exactly how the subtitles sit on your video before exporting.
-- **🎨 Font, Color, Size & Background Customization:** Style your subtitles exactly the way you want.
-- **🔑 Multiple API Keys with Auto-Switching:** If one key hits its limit or fails, the app automatically moves to the next one so nothing stops.
 - **🎭 Context-Aware Tone Selection (Exclusive Feature):** Choose the perfect tone that matches your video before starting the translation:
   * 🍿 **Cinematic & Drama:** For serious movies and TV shows.
   * 😂 **Comedy & Slang:** For sitcoms and comedies (expertly translates jokes and idioms).
   * 🎓 **Educational & Technical:** For online courses, YouTube tutorials, and scientific videos.
   * 👔 **Formal & Literary:** For documentaries and corporate presentations.
-- **📖 In-App User Guide:** No need to look elsewhere for instructions; everything is explained right inside the app.
-- **✏️ Edit & Regenerate Text:** Edit any line you're not happy with and regenerate just that part — very handy for getting the best possible result.
-- **🔑 Zero Coding Configuration:** No need to modify environment files or system settings! Simply open the app, click the dedicated button, paste your free Gemini API key(s) inside the input box, and you are ready to go!
+- **🔑 Zero Coding Configuration:** No need to modify environment files or system settings! Simply open the app, click the dedicated button, paste your free Gemini API key inside the input box, and you are ready to go!
 - **💰 100% Free & Ad-Free:** No subscriptions, no limits, and no annoying pop-ups. It connects directly and privately to your own API key.
 - **⏱️ Perfect Timestamp Preservation:** Your subtitle file structure remains untouched. Time codes and sequence numbers are preserved down to the millisecond—no audio-sync drifting!
 
@@ -169,15 +130,21 @@ This project is here to change the game! **Subtitle-Translator-Converter** allow
 
 🛑 **For Users Inside Iran (Bypassing Restrictions):** Since Google Gemini restricts Iranian IP addresses, **you must use a suitable VPN** to run the app. Please ensure your VPN is set to **TUN Mode** (for instance, enabling **TUN Mode in V2ray** works perfectly).
 
-🎬 **Important Note for Long Videos:** Generating subtitles from a video — especially a long one — consumes a large number of tokens from your Gemini account. If you're generating subtitles for a long video, make sure to either use **multiple API keys** at once so the app can switch between them, or use a **paid Gemini API key** so you don't run into limits or interruptions mid-process.
+---
 
-💡 **Tip for Speed & Accuracy:** If your video already has a good, accurate subtitle in another language (e.g., English), it's better to feed that existing subtitle file into the app for translation rather than having the app generate a brand-new subtitle from the video's audio. This uses fewer tokens and gives more accurate results.
+## 🌐 Use It Online (No Installation Needed)
+
+If you're not comfortable with local installation and running commands in CMD, no worries! A ready-to-use online version is available with the exact same features as the local version, no installation required. This version is specifically built to work smoothly on both mobile and desktop, so you can skip the hassle entirely. Just open the link below and get started:
+
+🔗 [https://subtitle-translator-online-production.up.railway.app](https://subtitle-translator-online-production.up.railway.app)
+
+> ℹ️ **Note:** This link is valid for approximately **30 days**, after which it will be updated and replaced with a new link. If the link above stops working, it simply means it's been refreshed — check back on this page for the updated address.
 
 ---
 
-## 📦 Step-by-Step Installation & Quick Start
+## 📦 Step-by-Step Installation & Quick Start (Local Setup)
 
-Follow these simple steps to run the application locally on your computer:
+If you'd rather run the app on your own machine, follow these simple steps:
 
 ### Prerequisites
 
@@ -213,14 +180,14 @@ Once executed, open your web browser and go to:
 http://localhost:3000
 ```
 
-**Note:** The terminal window (CMD) must remain open while using the app. Now, enter your API key(s), choose your tone, upload your subtitle or video, customize the subtitle style, preview it in the built-in player, and enjoy! 🚀
+**Note:** The terminal window (CMD) must remain open while using the app. Now, enter your API key, choose your tone, upload your subtitle, and enjoy! 🚀
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Frontend:** React / Vite / TypeScript (Ultra-fast and modern environment)
-- **AI Engine:** Google Gemini API (multi-key failover support)
+- **AI Engine:** Google Gemini API
 - **Runtime:** Node.js
 
 ---
@@ -228,12 +195,6 @@ http://localhost:3000
 ## 🤝 Contributing
 
 If you are a developer and want to add new translation tones, optimize the processing workflow, or bring more formats to the converter section, contributions are warmly welcomed! Open a Pull Request, and don't forget to drop a Star! ⭐
-
-[⬆️ Back to top](#بالا)
-
-<br><br><br>
-<!-- ایجاد فاصله برای تجربه کاربری بهتر هنگام اسکرول -->
-<br><br><br>
 
 ---
 
@@ -247,32 +208,15 @@ If you are a developer and want to add new translation tones, optimize the proce
 
 ---
 
-## 🆕 الجديد في هذا الإصدار
-
-- **🔑 دعم عدة مفاتيح API مع تبديل تلقائي:** لا داعي للقلق بعد الآن من نفاد الحد المسموح أو تعطل أحد المفاتيح! يمكنك إضافة عدة مفاتيح Gemini في آن واحد، وإذا واجه أحدها حد الاستخدام أو خطأً، ينتقل التطبيق تلقائياً إلى المفتاح التالي دون أي توقف في عملية الترجمة.
-- **🎬 توليد الترجمة تلقائياً من الفيديو (تحويل الكلام إلى نص):** واحدة من أبرز الإضافات في هذا الإصدار! فقط ارفع فيديو لا يحتوي على ترجمة أصلاً (بأي لغة)، وسيقوم التطبيق تلقائياً بتفريغ الكلام وإنشاء ملف ترجمة له. من هناك يمكنك ترجمة هذا الملف الجديد إلى أي لغة أو تعديله كما تشاء.
-- **▶️ مشغل معاينة مدمج:** تمت إضافة مشغل فيديو داخلي لمعاينة كيفية ظهور الترجمة على الفيديو مباشرة، والتحقق من التوقيت والتناسق قبل التصدير النهائي.
-- **🎨 تخصيص كامل لمظهر الترجمة:** قسم جديد يتيح لك التحكم في الخط ولونه وحجمه ولون/شفافية الخلفية وظل النص بما يناسب ذوقك تماماً.
-- **📖 قسم مساعدة للمستخدم:** تمت إضافة دليل استخدام داخل التطبيق لتسهيل استخدام جميع الميزات، خصوصاً للمستخدمين الجدد.
-- **✏️ تعديل النص وإعادة توليده:** إذا لم يكن جزء من الترجمة أو الترجمة المولّدة دقيقاً كما تريد، يمكنك تعديل النص مباشرة وإعادة توليد هذا الجزء فقط، دون الحاجة لإعادة العملية بأكملها.
-
----
-
 ## ✨ لماذا يُعد هذا التطبيق الأفضل؟
 
 - **🌍 دعم أكثر من 50 لغة:** سواء كانت ترجمتك الأصلية باللغة الإنجليزية، الكورية، الفرنسية، الإسبانية، أو أي لغة أخرى، يمكنك ترجمتها بسهولة إلى العربية أو أكثر من 50 لغة حية أخرى حول العالم.
-- **🎬 توليد ترجمة من فيديو بدون ترجمة:** حتى دون امتلاك ملف ترجمة، فقط ارفع الفيديو ودع التطبيق ينشئ واحداً جاهزاً للترجمة.
-- **▶️ معاينة مباشرة عبر المشغل:** تحقق بدقة من شكل الترجمة على الفيديو قبل التصدير.
-- **🎨 تخصيص الخط واللون والحجم والخلفية:** صمم شكل الترجمة تماماً كما تريد.
-- **🔑 عدة مفاتيح API مع تبديل تلقائي:** إذا تعطل أحد المفاتيح أو وصل لحده، ينتقل التطبيق تلقائياً للمفتاح التالي.
 - **🎭 اختيار نبرة وسياق الترجمة (ميزة حصرية):** يمكنك اختيار النبرة المثالية التي تناسب نوع الفيديو الخاص بك قبل البدء في الترجمة:
   * 🍿 **سينمائي ودرامي (Cinematic):** للأفلام والمسلسلات الجادة.
   * 😂 **كوميدي وعامي (Comedy):** للمسلسلات الكوميدية (ترجمة احترافية للنكات والمصطلحات الدارجة).
   * 🎓 **تعليمي وتقني (Educational):** للكورسات التعليمية، شروحات يوتيوب، والفيديوهات العلمية.
   * 👔 **رسمي وأكاديمي (Formal):** للأفلام الوثائقية وعروض الشركات.
-- **📖 دليل استخدام داخل التطبيق:** لا حاجة للبحث عن شرح خارجي؛ كل شيء موضح داخل التطبيق نفسه.
-- **✏️ تعديل النص وإعادة التوليد:** عدّل أي جزء من النص لا يعجبك وأعد توليده فقط؛ مفيد جداً للوصول إلى أفضل نتيجة ممكنة.
-- **🔑 إعداد سهل وبدون أكواد:** لا حاجة لتعديل ملفات النظام أو الإعدادات المعقدة! بمجرد فتح التطبيق، ستجد زراً مخصصاً؛ قم بلصق مفتاح (أو مفاتيح) الـ API المجانية من Gemini داخل المربع وابدأ فوراً!
+- **🔑 إعداد سهل وبدون أكواد:** لا حاجة لتعديل ملفات النظام أو الإعدادات المعقدة! بمجرد فتح التطبيق، ستجد زراً مخصصاً؛ قم بلصق مفتاح الـ API المجاني الخاص بك من Gemini داخل المربع وابدأ فوراً!
 - **💰 مجاني 100% وبدون إعلانات:** لا توجد اشتراكات، ولا حدود، ولا نوافذ منبثقة مزعجة. يتصل التطبيق مباشرة وبخصوصية تامة بمفتاح الـ API الخاص بك.
 - **⏱️ الحفاظ التام على التوقيت (Timing):** يظل هيكل ملف الترجمة كما هو دون أي تغيير. يتم الحفاظ على التوقيتات وأرقام السطور بدقة متناهية تصل إلى الأجزاء من الثانية، لضمان عدم حدوث أي تأخير أو تقديم في الصوت!
 
@@ -284,15 +228,21 @@ If you are a developer and want to add new translation tones, optimize the proce
 
 🛑 **للمستخدمين داخل إيران (تخطي الحجب):** نظراً لأن شركة Google تحظر عناوين الـ IP الإيرانية من استخدام Gemini، **يجب عليك استخدام VPN مناسب** لتشغيل التطبيق. يرجى التأكد من تفعيل وضع **TUN Mode** في الفيلترشكن الخاص بك (على سبيل المثال، تفعيل **TUN Mode في برنامج V2ray** يفي بالغرض تماماً).
 
-🎬 **ملاحظة هامة بخصوص الفيديوهات الطويلة:** توليد الترجمة من الفيديو، خصوصاً الفيديوهات الطويلة، يستهلك عدداً كبيراً من التوكنات من حساب Gemini الخاص بك. إذا كنت ستنشئ ترجمة لفيديو طويل، احرص على استخدام **عدة مفاتيح API** في آن واحد ليتمكن التطبيق من التبديل بينها، أو استخدام **مفتاح API مدفوع** من Gemini لتجنب الوصول إلى الحد المسموح أو انقطاع العملية.
+---
 
-💡 **نصيحة لسرعة ودقة أفضل:** إذا كان الفيديو الخاص بك يحتوي بالفعل على ترجمة جيدة ودقيقة بلغة أخرى (مثل الإنجليزية)، فمن الأفضل رفع ملف الترجمة الموجود مباشرة إلى التطبيق ليقوم بترجمته إلى اللغة التي تريدها، بدلاً من جعل التطبيق ينشئ ترجمة جديدة من صوت الفيديو. هذا يوفر توكنات أقل ويعطي نتائج أدق.
+## 🌐 الاستخدام أونلاين (بدون الحاجة إلى تثبيت)
+
+إذا لم تكن مرتاحاً للتثبيت المحلي والعمل عبر CMD، فلا مشكلة! هناك نسخة أونلاين جاهزة تحتوي على نفس ميزات النسخة المحلية تماماً، دون الحاجة لتثبيت أي برنامج. صُممت هذه النسخة خصيصاً لتعمل بسلاسة سواء على الجوال أو على الكمبيوتر، فقط افتح الرابط التالي وابدأ:
+
+🔗 [https://subtitle-translator-online-production.up.railway.app](https://subtitle-translator-online-production.up.railway.app)
+
+> ℹ️ **ملاحظة:** هذا الرابط صالح لمدة **30 يوماً تقريباً**، وبعدها سيتم تحديثه واستبداله برابط جديد. إذا لم يعمل الرابط أعلاه، فهذا يعني أنه تم تحديثه؛ يرجى مراجعة هذه الصفحة للحصول على الرابط الجديد.
 
 ---
 
-## 📦 دليل التثبيت والتشغيل خطوة بخطوة
+## 📦 دليل التثبيت والتشغيل خطوة بخطوة (التثبيت المحلي)
 
-اتبع هذه الخطوات البسيطة لتشغيل التطبيق محلياً على جهاز الكمبيوتر الخاص بك:
+إذا كنت تفضل تشغيل التطبيق على جهازك الخاص، اتبع هذه الخطوات البسيطة:
 
 ### المتطلبات الأساسية
 
@@ -328,14 +278,14 @@ npm run dev
 http://localhost:3000
 ```
 
-**ملاحظة:** يجب أن تظل نافذة الـ CMD مفتوحة أثناء استخدام التطبيق. الآن، أدخل مفتاح (أو مفاتيح) الـ API الخاصة بك، اختر النبرة المفضلة، ارفع الترجمة أو الفيديو، خصّص شكل الترجمة، وشاهد النتيجة في المشغل واستمتع! 🚀
+**ملاحظة:** يجب أن تظل نافذة الـ CMD مفتوحة أثناء استخدام التطبيق. الآن، أدخل مفتاح الـ API الخاص بك، اختر النبرة المفضلة، ارفع ملف الترجمة واستمتع! 🚀
 
 ---
 
 ## 🛠️ تقنيات المشروع (Tech Stack)
 
 - **Frontend:** React / Vite / TypeScript (بيئة عمل حديثة وفائقة السرعة)
-- **AI Engine:** Google Gemini API (دعم عدة مفاتيح API)
+- **AI Engine:** Google Gemini API
 - **Runtime:** Node.js
 
 ---
@@ -343,5 +293,3 @@ http://localhost:3000
 ## 🤝 المساهمة في المشروع
 
 إذا كنت مطوراً وترغب في إضافة نبرات ترجمة جديدة، تحسين سرعة المعالجة، أو دعم صيغ أكثر في قسم المحول، فنحن نرحب بمساهماتك بصدر رحب! قم بفتح Pull Request، ولا تنسَ ترك Star للمشروع! ⭐
-
-[⬆️ العودة إلى الأعلى](#بالا)
