@@ -42,6 +42,10 @@
 
 > ℹ️ **توجه:** این لینک تقریباً تا **۳۰ روز** معتبر است و پس از آن به‌روزرسانی می‌شود و لینک جدید جایگزین آن خواهد شد. اگه لینک بالا کار نکرد، یعنی به‌روزرسانی شده؛ سری به همین صفحه بزنید تا آدرس جدید رو ببینید.
 
+### 🎯 یه مزیت مهم نسبت به نسخه محلی
+
+توی نسخه‌ی آنلاین، برخلاف نسخه محلی، نیازی نیست کل مدت استفاده از برنامه وی‌پی‌ان روشن باشد! فقط زمانی که می‌خواهید از **AI Studio** کلید API رایگان بگیرید، وی‌پی‌ان را روشن کنید. به محض اینکه کلید را گرفتید و داخل برنامه وارد کردید، می‌توانید وی‌پی‌ان را خاموش کنید و بدون هیچ دردسری از برنامه استفاده کنید. 😌
+
 ---
 
 ## 📦 راهنمای گام‌به‌گام و آسانِ اجرای برنامه (نصب محلی)
@@ -140,6 +144,10 @@ If you're not comfortable with local installation and running commands in CMD, n
 
 > ℹ️ **Note:** This link is valid for approximately **30 days**, after which it will be updated and replaced with a new link. If the link above stops working, it simply means it's been refreshed — check back on this page for the updated address.
 
+### 🎯 A Key Advantage Over the Local Version
+
+Unlike the local version, with the online version you don't need to keep your VPN running the whole time. Just turn on your VPN when you go to grab a free API key from **AI Studio**. Once you've got the key and entered it into the app, you can turn your VPN off and use the app hassle-free. 😌
+
 ---
 
 ## 📦 Step-by-Step Installation & Quick Start (Local Setup)
@@ -237,6 +245,10 @@ If you are a developer and want to add new translation tones, optimize the proce
 🔗 [https://subtitle-translator-online-production.up.railway.app](https://subtitle-translator-online-production.up.railway.app)
 
 > ℹ️ **ملاحظة:** هذا الرابط صالح لمدة **30 يوماً تقريباً**، وبعدها سيتم تحديثه واستبداله برابط جديد. إذا لم يعمل الرابط أعلاه، فهذا يعني أنه تم تحديثه؛ يرجى مراجعة هذه الصفحة للحصول على الرابط الجديد.
+
+### 🎯 ميزة مهمة مقارنة بالنسخة المحلية
+
+على عكس النسخة المحلية، لا تحتاج في النسخة الأونلاين لإبقاء الـ VPN مفعّلاً طوال وقت الاستخدام! فقط قم بتشغيل الـ VPN عندما تريد الحصول على مفتاح API مجاني من **AI Studio**. بمجرد الحصول على المفتاح وإدخاله في التطبيق، يمكنك إيقاف تشغيل الـ VPN والاستمتاع باستخدام التطبيق دون أي متاعب. 😌
 
 ---
 
